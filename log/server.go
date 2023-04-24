@@ -12,14 +12,15 @@ import (
 func ServerLogInterceptor(ctx context.Context, req interface{},
 	info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 	reqJson := cutils.Obj2Json(req)
+	Debugf("[%v]req: %v", info.FullMethod, reqJson)
 	start := time.Now()
 	rsp, err := handler(ctx, req)
-	rspJson := cutils.Obj2Json(rsp)
 	cost := time.Since(start).Milliseconds()
-	if err == nil {
-		Debugf("[%v][cost: %vms] req: %v, rsp: %v", info.FullMethod, cost, reqJson, rspJson)
+	if err != nil {
+		Errorf("[%v][cost: %vms]err: %v", info.FullMethod, cost, err)
 	} else {
-		Errorf("[%v][cost: %vms] req: %v, err: %v", info.FullMethod, cost, reqJson, err)
+		rspJson := cutils.Obj2Json(rsp)
+		Debugf("[%v][cost: %vms]rsp: %v", info.FullMethod, cost, rspJson)
 	}
 	return rsp, err
 }
