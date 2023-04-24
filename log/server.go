@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/turing-era/turingera/cutils"
+	"github.com/turing-era/turingera-shared/cutils"
 	"google.golang.org/grpc"
 )
 

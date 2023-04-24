@@ -5,7 +5,7 @@ import (
 	"runtime"
 	"sync"
 
-	"github.com/turing-era/turingera/log"
+	"github.com/turing-era/turingera-shared/log"
 )
 
 // PanicBufLen is len of buffer used for stack trace logging

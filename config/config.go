@@ -3,7 +3,7 @@ package config
 import (
 	"github.com/spf13/viper"
 
-	"github.com/turing-era/turingera/log"
+	"github.com/turing-era/turingera-shared/log"
 )
 
 // Init 配置初始化

@@ -3,7 +3,7 @@ package server
 import (
 	"net"
 
-	"github.com/turing-era/turingera/log"
+	"github.com/turing-era/turingera-shared/log"
 	"google.golang.org/grpc"
 )
 

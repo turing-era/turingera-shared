@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/panjf2000/ants/v2"
-	"github.com/turing-era/turingera/log"
+	"github.com/turing-era/turingera-shared/log"
 	"google.golang.org/grpc/metadata"
 )
 

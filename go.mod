@@ -1,4 +1,4 @@
-module github.com/turing-era/turingera
+module github.com/turing-era/turingera-shared
 
 go 1.16
 
