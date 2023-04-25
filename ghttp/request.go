@@ -13,15 +13,22 @@ import (
 )
 
 // Post 发送post请求
-func Post(path string, req interface{}, rsp interface{}) error {
+func Post(path string, req interface{}, rsp interface{}, header map[string]string) error {
 	mJson, err := jsoniter.Marshal(req)
 	if err != nil {
 		return err
 	}
-	resp, err := http.Post(path, "application/json", bytes.NewReader(mJson))
+	httpReq, err := http.NewRequest("POST", path, bytes.NewReader(mJson))
 	if err != nil {
 		return err
 	}
+	httpReq.Header.Set("Content-Type", "application/json")
+	if header != nil {
+		for k, v := range header {
+			httpReq.Header.Set(k, v)
+		}
+	}
+	resp, err := http.DefaultClient.Do(httpReq)
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
