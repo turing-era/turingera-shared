@@ -18,6 +18,7 @@ func Post(path string, req interface{}, rsp interface{}, header map[string]strin
 	if err != nil {
 		return err
 	}
+	log.Debugf("http req: %s", mJson)
 	httpReq, err := http.NewRequest("POST", path, bytes.NewReader(mJson))
 	if err != nil {
 		return err
@@ -34,11 +35,10 @@ func Post(path string, req interface{}, rsp interface{}, header map[string]strin
 	if err != nil {
 		return err
 	}
-	fmt.Printf("rsp: %s\n", body)
+	log.Debugf("http rsp: %s", body)
 	if err = jsoniter.Unmarshal(body, rsp); err != nil {
 		return err
 	}
-	log.Debugf("http request: %v, req: %s, rsp: %s", path, mJson, cutils.Obj2Json(rsp))
 	return nil
 }
 
