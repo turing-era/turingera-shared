@@ -38,8 +38,8 @@ func RunGatewayServer(configs []*GatewayConfig) {
 			runtime.MIMEWildcard,
 			&runtime.JSONPb{
 				MarshalOptions: protojson.MarshalOptions{
-					UseEnumNumbers:  true,
-					UseProtoNames:   true,
+					UseEnumNumbers: true,
+					// UseProtoNames:   true,
 					EmitUnpopulated: true,
 				},
 				UnmarshalOptions: protojson.UnmarshalOptions{
