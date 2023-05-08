@@ -12,7 +12,7 @@ type GrpcConfig struct {
 	Name              string
 	Addr              string
 	AuthPublicKeyFile string
-	RegisterFunc      func(*grpc.Server)
+	RegisterFuncs     []func(*grpc.Server)
 }
 
 // RunGrpcServer 启动grpc服务
@@ -27,8 +27,9 @@ func RunGrpcServer(c *GrpcConfig) {
 	opts = append(opts, grpc.UnaryInterceptor(log.ServerLogInterceptor))
 
 	s := grpc.NewServer(opts...)
-	c.RegisterFunc(s)
-
+	for _, f := range c.RegisterFuncs {
+		f(s)
+	}
 	log.Infof("[%v]server started: %v", c.Name, c.Addr)
 	panic(s.Serve(lis))
 }

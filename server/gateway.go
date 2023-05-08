@@ -15,8 +15,8 @@ import (
 
 // GatewayConfig 网关服务配置
 type GatewayConfig struct {
-	Addr         string
-	RegisterFunc func(ctx context.Context, mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) (err error)
+	Addr          string
+	RegisterFuncs []func(ctx context.Context, mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) (err error)
 }
 
 func customHeaderMatcher(key string) (string, bool) {
@@ -48,11 +48,13 @@ func RunGatewayServer(configs []*GatewayConfig) {
 			},
 		))
 	for _, c := range configs {
-		err := c.RegisterFunc(ctx, mux, c.Addr,
-			[]grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())},
-		)
-		if err != nil {
-			panic("gateway cannot register service: " + err.Error())
+		for _, f := range c.RegisterFuncs {
+			err := f(ctx, mux, c.Addr,
+				[]grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())},
+			)
+			if err != nil {
+				panic("gateway cannot register service: " + err.Error())
+			}
 		}
 	}
 	addr := ":8081"
