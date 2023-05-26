@@ -21,8 +21,9 @@ type GatewaySubConfig struct {
 
 // GatewayConfig 网关服务配置
 type GatewayConfig struct {
-	GateAddr   string
-	SubConfigs []GatewaySubConfig
+	GateAddr      string
+	UseProtoNames bool
+	SubConfigs    []GatewaySubConfig
 }
 
 func customHeaderMatcher(key string) (string, bool) {
@@ -44,8 +45,8 @@ func RunGatewayServer(config *GatewayConfig) {
 			runtime.MIMEWildcard,
 			&runtime.JSONPb{
 				MarshalOptions: protojson.MarshalOptions{
-					UseEnumNumbers: true,
-					// UseProtoNames:   true,
+					UseEnumNumbers:  true,
+					UseProtoNames:   config.UseProtoNames,
 					EmitUnpopulated: true,
 				},
 				UnmarshalOptions: protojson.UnmarshalOptions{
