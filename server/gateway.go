@@ -13,10 +13,16 @@ import (
 	"google.golang.org/protobuf/encoding/protojson"
 )
 
+// GatewaySubConfig 网关服务子配置
+type GatewaySubConfig struct {
+	ServerAddr    string
+	RegisterFuncs []func(ctx context.Context, mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) (err error)
+}
+
 // GatewayConfig 网关服务配置
 type GatewayConfig struct {
-	Addr          string
-	RegisterFuncs []func(ctx context.Context, mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) (err error)
+	GateAddr   string
+	SubConfigs []GatewaySubConfig
 }
 
 func customHeaderMatcher(key string) (string, bool) {
@@ -27,7 +33,7 @@ func customHeaderMatcher(key string) (string, bool) {
 }
 
 // RunGatewayServer 启动网关服务
-func RunGatewayServer(configs []*GatewayConfig) {
+func RunGatewayServer(config *GatewayConfig) {
 	ctx := context.Background()
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
@@ -47,9 +53,9 @@ func RunGatewayServer(configs []*GatewayConfig) {
 				},
 			},
 		))
-	for _, c := range configs {
+	for _, c := range config.SubConfigs {
 		for _, f := range c.RegisterFuncs {
-			err := f(ctx, mux, c.Addr,
+			err := f(ctx, mux, c.ServerAddr,
 				[]grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())},
 			)
 			if err != nil {
@@ -57,9 +63,8 @@ func RunGatewayServer(configs []*GatewayConfig) {
 			}
 		}
 	}
-	addr := ":8081"
-	log.Infof("grpc gateway started at %s", addr)
-	panic(http.ListenAndServe(addr, tracingWrapper(mux)))
+	log.Infof("grpc gateway started at %s", config.GateAddr)
+	panic(http.ListenAndServe(config.GateAddr, tracingWrapper(mux)))
 }
 
 func tracingWrapper(h http.Handler) http.Handler {
