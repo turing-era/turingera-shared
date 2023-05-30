@@ -46,10 +46,12 @@ func (i *interceptor) handleReq(ctx context.Context, req interface{},
 	if err != nil {
 		return nil, status.Error(codes.Unauthenticated, "")
 	}
-
-	userID, err := i.verifier.Verify(tkn)
-	if err != nil {
-		return nil, status.Errorf(codes.Unauthenticated, "token not valid: %v", err)
+	var userID string
+	if info.FullMethod != "/turingera.server.userinfo.Userinfo/InitUser" {
+		userID, err = i.verifier.Verify(tkn)
+		if err != nil {
+			return nil, status.Errorf(codes.Unauthenticated, "token not valid: %v", err)
+		}
 	}
 	return handler(ctxWithUserID(ctx, userID), req)
 }
