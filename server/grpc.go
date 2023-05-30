@@ -22,18 +22,18 @@ func RunGrpcServer(c *GrpcConfig) {
 	if err != nil {
 		panic("grpc cannot listen: " + err.Error())
 	}
-
-	var opts []grpc.ServerOption
-	// 服务日志拦截器
-	opts = append(opts, grpc.UnaryInterceptor(log.ServerLogInterceptor))
-	if c.AuthPublicKeyFile != "" {
+	var interceptors []grpc.UnaryServerInterceptor
+	// 日志拦截器
+	interceptors = append(interceptors, log.ServerLogInterceptor)
+	// 鉴权拦截器
+	if len(c.AuthPublicKeyFile) > 0 {
 		in, err := auth.Interceptor(c.AuthPublicKeyFile)
 		if err != nil {
 			panic("cannot create auth intercept: " + err.Error())
 		}
-		opts = append(opts, grpc.UnaryInterceptor(in))
+		interceptors = append(interceptors, in)
 	}
-	s := grpc.NewServer(opts...)
+	s := grpc.NewServer(grpc.ChainUnaryInterceptor(interceptors...))
 	for _, f := range c.RegisterFuncs {
 		f(s)
 	}

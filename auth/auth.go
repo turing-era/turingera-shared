@@ -44,7 +44,7 @@ func (i *interceptor) handleReq(ctx context.Context, req interface{},
 	info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
 	tkn, err := tokenFromCtx(ctx)
 	if err != nil {
-		return nil, unauthenticated
+		return nil, err
 	}
 	var userID string
 	if info.FullMethod != "/turingera.server.userinfo.Userinfo/InitUser" {

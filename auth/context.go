@@ -15,35 +15,29 @@ const (
 	userIDKey           = "user_id"
 )
 
-var unauthenticated = status.Error(codes.Unauthenticated, "unauthenticated")
-
 func tokenFromCtx(c context.Context) (string, error) {
-	m, ok := metadata.FromIncomingContext(c)
-	if !ok {
-		return "", unauthenticated
-	}
-	tkn := ""
-	for _, v := range m[authorizationHeader] {
+	values := metadata.ValueFromIncomingContext(c, authorizationHeader)
+	var tkn string
+	for _, v := range values {
 		if strings.HasPrefix(v, bearerPrefix) {
 			tkn = v[len(bearerPrefix):]
 		}
 	}
-	if tkn == "" {
-		return "", unauthenticated
+	if len(tkn) == 0 {
+		return "", status.Error(codes.Unauthenticated, "token not found")
 	}
 	return tkn, nil
 }
 
-func ctxWithUserID(c context.Context, aid string) context.Context {
-	return context.WithValue(c, userIDKey, aid)
+func ctxWithUserID(c context.Context, userID string) context.Context {
+	return context.WithValue(c, userIDKey, userID)
 }
 
 // UserIDFromCtx 从ctx中取出账号id
 func UserIDFromCtx(c context.Context) (string, error) {
-	v := c.Value(userIDKey)
-	aid, ok := v.(string)
+	userID, ok := c.Value(userIDKey).(string)
 	if !ok {
-		return "", unauthenticated
+		return "", status.Error(codes.Unauthenticated, "userID not found")
 	}
-	return aid, nil
+	return userID, nil
 }
