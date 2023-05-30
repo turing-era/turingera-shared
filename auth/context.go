@@ -15,8 +15,9 @@ const (
 	userIDKey           = "user_id"
 )
 
+var unauthenticated = status.Error(codes.Unauthenticated, "unauthenticated")
+
 func tokenFromCtx(c context.Context) (string, error) {
-	unauthenticated := status.Error(codes.Unauthenticated, "unauthenticated")
 	m, ok := metadata.FromIncomingContext(c)
 	if !ok {
 		return "", unauthenticated
@@ -42,7 +43,7 @@ func UserIDFromCtx(c context.Context) (string, error) {
 	v := c.Value(userIDKey)
 	aid, ok := v.(string)
 	if !ok {
-		return "", status.Error(codes.Unauthenticated, "")
+		return "", unauthenticated
 	}
 	return aid, nil
 }
