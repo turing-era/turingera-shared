@@ -41,13 +41,13 @@ type interceptor struct {
 }
 
 func (i *interceptor) handleReq(ctx context.Context, req interface{},
-	info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
-	tkn, err := tokenFromCtx(ctx)
-	if err != nil {
-		return nil, err
-	}
+	info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 	var userID string
 	if info.FullMethod != "/turingera.server.userinfo.Userinfo/InitUser" {
+		tkn, err := tokenFromCtx(ctx)
+		if err != nil {
+			return nil, err
+		}
 		userID, err = i.verifier.Verify(tkn)
 		if err != nil {
 			return nil, status.Errorf(codes.Unauthenticated, "token not valid: %v", err)
