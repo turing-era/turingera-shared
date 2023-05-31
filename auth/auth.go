@@ -7,6 +7,8 @@ import (
 	"os"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/spf13/viper"
+	"github.com/turing-era/turingera-shared/cutils"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -43,7 +45,8 @@ type interceptor struct {
 func (i *interceptor) handleReq(ctx context.Context, req interface{},
 	info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 	var userID string
-	if info.FullMethod != "/turingera.server.userinfo.Userinfo/InitUser" {
+	openMethods := viper.GetStringSlice("auth.open_method")
+	if !cutils.InStringList(openMethods, info.FullMethod) {
 		tkn, err := tokenFromCtx(ctx)
 		if err != nil {
 			return nil, err
