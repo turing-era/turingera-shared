@@ -25,6 +25,9 @@ func Get(path string, rsp interface{}, header map[string]string) error {
 		}
 	}
 	resp, err := http.DefaultClient.Do(httpReq)
+	if err != nil {
+		return err
+	}
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
@@ -55,6 +58,9 @@ func Post(path string, req interface{}, rsp interface{}, header map[string]strin
 		}
 	}
 	resp, err := http.DefaultClient.Do(httpReq)
+	if err != nil {
+		return err
+	}
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
