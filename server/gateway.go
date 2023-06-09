@@ -84,7 +84,10 @@ func RunGatewayServer(config *GatewayConfig) {
 func tracingWrapper(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		body, _ := httputil.DumpRequest(r, true)
-		log.Debugf("[%v] %s", r.URL, body)
+		log.Debugf("[%v]", r.URL)
+		if !strings.HasPrefix(r.URL.Path, "/upload") {
+			log.Debugf("[body]%s", body)
+		}
 		h.ServeHTTP(w, r)
 	})
 }
