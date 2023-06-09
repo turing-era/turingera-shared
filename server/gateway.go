@@ -13,17 +13,24 @@ import (
 	"google.golang.org/protobuf/encoding/protojson"
 )
 
-// GatewaySubConfig 网关服务子配置
-type GatewaySubConfig struct {
+// GrpcGatewayConfig 网关服务子配置
+type GrpcGatewayConfig struct {
 	ServerAddr    string
 	RegisterFuncs []func(ctx context.Context, mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) (err error)
 }
 
 // GatewayConfig 网关服务配置
 type GatewayConfig struct {
-	GateAddr      string
-	UseProtoNames bool
-	SubConfigs    []GatewaySubConfig
+	GateAddr          string
+	UseProtoNames     bool
+	GrpcSubConfigs    []GrpcGatewayConfig
+	HandlePathConfigs []HandlePathConfig
+}
+
+type HandlePathConfig struct {
+	Meth        string
+	PathPattern string
+	Handle      runtime.HandlerFunc
 }
 
 func customHeaderMatcher(key string) (string, bool) {
@@ -54,7 +61,13 @@ func RunGatewayServer(config *GatewayConfig) {
 				},
 			},
 		))
-	for _, c := range config.SubConfigs {
+	for _, h := range config.HandlePathConfigs {
+		err := mux.HandlePath(h.Meth, h.PathPattern, h.Handle)
+		if err != nil {
+			panic("gateway cannot HandlePath: " + err.Error())
+		}
+	}
+	for _, c := range config.GrpcSubConfigs {
 		for _, f := range c.RegisterFuncs {
 			err := f(ctx, mux, c.ServerAddr,
 				[]grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())},
