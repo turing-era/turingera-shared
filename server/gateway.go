@@ -23,6 +23,7 @@ type GrpcGatewayConfig struct {
 type GatewayConfig struct {
 	GateAddr          string
 	UseProtoNames     bool
+	AuthPublicKeyFile string
 	GrpcSubConfigs    []GrpcGatewayConfig
 	HandlePathConfigs []HandlePathConfig
 }
@@ -61,6 +62,9 @@ func RunGatewayServer(config *GatewayConfig) {
 				},
 			},
 		))
+	if len(config.AuthPublicKeyFile) > 0 {
+
+	}
 	for _, h := range config.HandlePathConfigs {
 		err := mux.HandlePath(h.Meth, h.PathPattern, h.Handle)
 		if err != nil {

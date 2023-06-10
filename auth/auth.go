@@ -2,9 +2,12 @@ package auth
 
 import (
 	"context"
+	"crypto/rsa"
 	"fmt"
 	"io/ioutil"
+	"net/http"
 	"os"
+	"strings"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/spf13/viper"
@@ -16,8 +19,7 @@ import (
 	"github.com/funstartech/funstar-shared/auth/token"
 )
 
-// Interceptor 拦截器方法
-func Interceptor(publicKeyFile string) (grpc.UnaryServerInterceptor, error) {
+func loadPublicKey(publicKeyFile string) (*rsa.PublicKey, error) {
 	f, err := os.Open(publicKeyFile)
 	if err != nil {
 		return nil, fmt.Errorf("cannot open public key file: %v", err)
@@ -26,10 +28,18 @@ func Interceptor(publicKeyFile string) (grpc.UnaryServerInterceptor, error) {
 	if err != nil {
 		return nil, fmt.Errorf("cannot read public key: %v", err)
 	}
-
 	pubKey, err := jwt.ParseRSAPublicKeyFromPEM(b)
 	if err != nil {
 		return nil, fmt.Errorf("cannot parse public key: %v", err)
+	}
+	return pubKey, nil
+}
+
+// Interceptor 拦截器方法
+func Interceptor(publicKeyFile string) (grpc.UnaryServerInterceptor, error) {
+	pubKey, err := loadPublicKey(publicKeyFile)
+	if err != nil {
+		return nil, err
 	}
 	i := &interceptor{
 		verifier: &token.JWTTokenVerifier{PublicKey: pubKey},
@@ -38,8 +48,41 @@ func Interceptor(publicKeyFile string) (grpc.UnaryServerInterceptor, error) {
 
 }
 
+var DefaultInterceptor *interceptor
+
+// InitInterceptor 原生拦截器
+func InitInterceptor(publicKeyFile string) error {
+	pubKey, err := loadPublicKey(publicKeyFile)
+	if err != nil {
+		return err
+	}
+	DefaultInterceptor = &interceptor{
+		verifier: &token.JWTTokenVerifier{PublicKey: pubKey},
+	}
+	return nil
+}
+
 type interceptor struct {
 	verifier *token.JWTTokenVerifier
+}
+
+// GetAuthUserID 获取鉴权userID
+func (i *interceptor) GetAuthUserID(w http.ResponseWriter, r *http.Request) (string, bool) {
+	var tkn string
+	auth := r.Header.Get("Authorization")
+	if strings.HasPrefix(auth, bearerPrefix) {
+		tkn = auth[len(bearerPrefix):]
+	}
+	if len(tkn) == 0 {
+		http.Error(w, fmt.Sprintf("token empty"), http.StatusUnauthorized)
+		return "", false
+	}
+	userID, err := i.verifier.Verify(tkn)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("token not valid: %v", err), http.StatusUnauthorized)
+		return "", false
+	}
+	return userID, true
 }
 
 func (i *interceptor) handleReq(ctx context.Context, req interface{},
