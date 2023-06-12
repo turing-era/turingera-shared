@@ -4,7 +4,6 @@ import (
 	"context"
 	"strings"
 
-	"github.com/turing-era/turingera-shared/log"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
@@ -21,7 +20,7 @@ func tokenFromCtx(ctx context.Context) (string, error) {
 	if !ok {
 		return "", status.Error(codes.Unauthenticated, "token not found")
 	}
-	log.Debugf("md: %+v", md)
+	// log.Debugf("md: %+v", md)
 	var tkn string
 	for _, v := range md[authorizationHeader] {
 		if strings.HasPrefix(v, bearerPrefix) {
