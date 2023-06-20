@@ -20,7 +20,7 @@ func tokenFromCtx(ctx context.Context) (string, error) {
 	if !ok {
 		return "", status.Error(codes.Unauthenticated, "token not found")
 	}
-	// log.Debugf("md: %+v", md)
+	// fmt.Printf("md: %+v\n", md)
 	var tkn string
 	for _, v := range md[authorizationHeader] {
 		if strings.HasPrefix(v, bearerPrefix) {
@@ -38,15 +38,20 @@ func ctxWithUserID(ctx context.Context, userID string) context.Context {
 }
 
 // InheritCtx 继承ctx
-func InheritCtx(ctx context.Context) context.Context {
-	md, _ := metadata.FromIncomingContext(ctx)
+func InheritCtx(ctx context.Context, server string) context.Context {
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		md = metadata.New(map[string]string{})
+	}
+	md.Set("from", "internal")
+	md.Set("server", server)
 	return metadata.NewOutgoingContext(ctx, md)
 }
 
 // UserIDFromCtx 从ctx中取出账号id
 func UserIDFromCtx(ctx context.Context) (string, error) {
 	userID, ok := ctx.Value(userIDKey).(string)
-	if !ok {
+	if !ok || len(userID) == 0 {
 		return "", status.Error(codes.Unauthenticated, "userID not found")
 	}
 	return userID, nil

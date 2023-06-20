@@ -14,6 +14,7 @@ import (
 	"github.com/turing-era/turingera-shared/cutils"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 
 	"github.com/funstartech/funstar-shared/auth/token"
@@ -88,8 +89,13 @@ func (i *interceptor) GetAuthUserID(w http.ResponseWriter, r *http.Request) (str
 func (i *interceptor) handleReq(ctx context.Context, req interface{},
 	info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 	var userID string
+	// 内部调用
+	from := metadata.ValueFromIncomingContext(ctx, "from")
+	internal := len(from) > 0 && from[0] == "internal"
+	// 开放方法
 	openMethods := viper.GetStringSlice("auth.open_method")
-	if !cutils.InStringList(openMethods, info.FullMethod) {
+	openMethod := cutils.InStringList(openMethods, info.FullMethod)
+	if !internal && !openMethod {
 		tkn, err := tokenFromCtx(ctx)
 		if err != nil {
 			return nil, err
