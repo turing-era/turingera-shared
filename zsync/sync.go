@@ -8,9 +8,9 @@ import (
 	"github.com/turing-era/turingera-shared/log"
 )
 
-// PanicBufLen is len of buffer used for stack trace logging
+// panicBufLen is len of buffer used for stack trace logging
 // when the goroutine panics, 1024 by default.
-var PanicBufLen = 1024
+const panicBufLen = 1024
 
 // GoAndWait provides safe concurrent handling. Per input handler, it starts a goroutine.
 // Then it waits until all handlers are done and will recover if any handler panics.
@@ -31,7 +31,7 @@ func GoAndWait(maxGoroutineCnt int, handlers ...func() error) error {
 		go func(handler func() error) {
 			defer func() {
 				if e := recover(); e != nil {
-					buf := make([]byte, PanicBufLen)
+					buf := make([]byte, panicBufLen)
 					buf = buf[:runtime.Stack(buf, false)]
 					log.Errorf("[PANIC]%v\n%s\n", e, buf)
 					once.Do(func() {

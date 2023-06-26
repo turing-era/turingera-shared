@@ -80,7 +80,7 @@ func (g *asyncGoer) Go(ctx context.Context, timeout time.Duration, handler func(
 }
 
 // DefaultGoer is an async goer without workerpool.
-var DefaultGoer = NewAsyncGoer(0, PanicBufLen, true)
+var DefaultGoer = NewAsyncGoer(0, panicBufLen, true)
 
 // Go launches a safer goroutine for async task inside rpc handler.
 // it clones ctx and msg before the goroutine, and will recover and report metrics when the goroutine panics.
