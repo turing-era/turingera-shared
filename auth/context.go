@@ -51,7 +51,7 @@ func InheritCtx(ctx context.Context, server string) context.Context {
 // UserIDFromCtx 从ctx中取出账号id
 func UserIDFromCtx(ctx context.Context) (string, error) {
 	userID, ok := ctx.Value(userIDKey).(string)
-	if !ok || len(userID) == 0 {
+	if !ok {
 		return "", status.Error(codes.Unauthenticated, "userID not found")
 	}
 	return userID, nil

@@ -104,6 +104,7 @@ func (i *interceptor) handleReq(ctx context.Context, req interface{},
 		if err != nil {
 			return nil, status.Errorf(codes.Unauthenticated, "token not valid: %v", err)
 		}
+		ctx = ctxWithUserID(ctx, userID)
 	}
-	return handler(ctxWithUserID(ctx, userID), req)
+	return handler(ctx, req)
 }
