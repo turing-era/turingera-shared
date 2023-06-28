@@ -1,13 +1,17 @@
 package cutils
 
 import (
+	"context"
 	"fmt"
 	"math/rand"
 	"net"
+	"strings"
 	"time"
 	"unsafe"
 
 	jsoniter "github.com/json-iterator/go"
+	"github.com/thinkeridea/go-extend/exnet"
+	"google.golang.org/grpc/metadata"
 )
 
 // Str2Bytes string转[]byte无拷贝
@@ -44,8 +48,8 @@ func RandString(length int) string {
 	return fmt.Sprintf("%x", b)[2 : length+2]
 }
 
-// GetIP 获取本机ip
-func GetIP() string {
+// GetLocalIP 获取本机ip
+func GetLocalIP() string {
 	addrs, err := net.InterfaceAddrs()
 	if err != nil {
 		return ""
@@ -57,6 +61,21 @@ func GetIP() string {
 				return ipnet.IP.String()
 			}
 		}
+	}
+	return ""
+}
+
+// GetClientIp 获取ctx中header client ip
+func GetClientIp(ctx context.Context) string {
+	ip := metadata.ValueFromIncomingContext(ctx, "x-forwarded-for")[0]
+	for _, ip = range strings.Split(ip, ",") {
+		if ip = strings.TrimSpace(ip); ip != "" && !exnet.HasLocalIPAddr(ip) {
+			return ip
+		}
+	}
+	ip = metadata.ValueFromIncomingContext(ctx, "x-real-ip")[0]
+	if ip = strings.TrimSpace(ip); ip != "" && !exnet.HasLocalIPAddr(ip) {
+		return ip
 	}
 	return ""
 }
