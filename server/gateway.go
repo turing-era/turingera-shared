@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
+	"github.com/thinkeridea/go-extend/exnet"
 	"github.com/turing-era/turingera-shared/log"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -87,10 +88,14 @@ func RunGatewayServer(config *GatewayConfig) {
 
 func tracingWrapper(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		body, _ := httputil.DumpRequest(r, true)
-		log.Debugf("[%v]", r.URL)
-		if !strings.HasPrefix(r.URL.Path, "/upload") {
-			log.Debugf("[body]%s", body)
+		log.Debugf("ip: %v", exnet.ClientPublicIP(r))
+		body, err := httputil.DumpRequest(r, true)
+		if err != nil {
+			log.Errorf("httputil.DumpRequest err: %v", err)
+		} else {
+			if !strings.HasPrefix(r.URL.Path, "/upload") {
+				log.Debugf("[body]%s", body)
+			}
 		}
 		h.ServeHTTP(w, r)
 	})
