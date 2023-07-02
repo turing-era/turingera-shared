@@ -4,6 +4,7 @@ import (
 	"context"
 	"strings"
 
+	"github.com/turing-era/turingera-shared/log"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
@@ -34,6 +35,7 @@ func tokenFromCtx(ctx context.Context) (string, error) {
 }
 
 func ctxWithUserID(ctx context.Context, userID string) context.Context {
+	log.Debugf("user_id: %v", userID)
 	return context.WithValue(ctx, userIDKey, userID)
 }
 
