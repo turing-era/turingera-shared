@@ -2,6 +2,7 @@ package ghttp
 
 import (
 	"bytes"
+	"crypto/tls"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -11,6 +12,15 @@ import (
 	"github.com/turing-era/turingera-shared/cutils"
 	"github.com/turing-era/turingera-shared/log"
 )
+
+var client *http.Client
+
+func init() {
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	client = &http.Client{Transport: tr}
+}
 
 // Get 发送Get请求
 func Get(path string, rsp interface{}, header map[string]string) error {
@@ -24,7 +34,7 @@ func Get(path string, rsp interface{}, header map[string]string) error {
 			httpReq.Header.Set(k, v)
 		}
 	}
-	resp, err := http.DefaultClient.Do(httpReq)
+	resp, err := client.Do(httpReq)
 	if err != nil {
 		return err
 	}
@@ -57,7 +67,7 @@ func Post(path string, req interface{}, rsp interface{}, header map[string]strin
 			httpReq.Header.Set(k, v)
 		}
 	}
-	resp, err := http.DefaultClient.Do(httpReq)
+	resp, err := client.Do(httpReq)
 	if err != nil {
 		return err
 	}
