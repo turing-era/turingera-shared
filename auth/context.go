@@ -2,12 +2,14 @@ package auth
 
 import (
 	"context"
+	"strconv"
 	"strings"
 
-	"github.com/turing-era/turingera-shared/log"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
+
+	"github.com/turing-era/turingera-shared/log"
 )
 
 const (
@@ -57,4 +59,17 @@ func UserIDFromCtx(ctx context.Context) (string, error) {
 		return "", status.Error(codes.Unauthenticated, "userID not found")
 	}
 	return userID, nil
+}
+
+// UidFromCtx 从ctx中取出uid
+func UidFromCtx(ctx context.Context) (int64, error) {
+	userID, ok := ctx.Value(userIDKey).(string)
+	if !ok {
+		return 0, status.Error(codes.Unauthenticated, "uid not found")
+	}
+	uid, err := strconv.ParseInt(userID, 10, 64)
+	if err != nil {
+		return 0, status.Errorf(codes.Unauthenticated, "userID[%v] ParseInt err: %v", userID, err)
+	}
+	return uid, nil
 }
