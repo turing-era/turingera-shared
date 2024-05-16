@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -23,7 +24,7 @@ func tokenFromCtx(ctx context.Context) (string, error) {
 	if !ok {
 		return "", status.Error(codes.Unauthenticated, "token not found")
 	}
-	// fmt.Printf("md: %+v\n", md)
+	fmt.Printf("md: %+v\n", md)
 	var tkn string
 	for _, v := range md[authorizationHeader] {
 		if strings.HasPrefix(v, bearerPrefix) {
