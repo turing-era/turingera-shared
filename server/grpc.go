@@ -3,9 +3,10 @@ package server
 import (
 	"net"
 
+	"google.golang.org/grpc"
+
 	"github.com/turing-era/turingera-shared/auth"
 	"github.com/turing-era/turingera-shared/log"
-	"google.golang.org/grpc"
 )
 
 // GrpcConfig grpc服务配置
@@ -26,6 +27,7 @@ func RunGrpcServer(c *GrpcConfig) {
 	// 日志拦截器
 	interceptors = append(interceptors, log.ServerLogInterceptor)
 	// 鉴权拦截器
+	log.Debugf("serverConfig: %+v", c)
 	if len(c.AuthPublicKeyFile) > 0 {
 		in, err := auth.Interceptor(c.AuthPublicKeyFile)
 		if err != nil {

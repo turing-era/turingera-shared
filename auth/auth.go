@@ -11,7 +11,10 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/spf13/viper"
+
 	"github.com/turing-era/turingera-shared/cutils"
+	"github.com/turing-era/turingera-shared/log"
+
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
@@ -42,6 +45,7 @@ func Interceptor(publicKeyFile string) (grpc.UnaryServerInterceptor, error) {
 	if err != nil {
 		return nil, err
 	}
+	log.Debugf("load publicKeyFile: %v, pubKey: %v", publicKeyFile, pubKey)
 	i := &interceptor{
 		verifier: &token.JWTTokenVerifier{PublicKey: pubKey},
 	}
@@ -95,6 +99,7 @@ func (i *interceptor) handleReq(ctx context.Context, req interface{},
 	// 开放方法
 	openMethods := viper.GetStringSlice("auth.open_method")
 	openMethod := cutils.InStringList(openMethods, info.FullMethod)
+	log.Debugf("internal: %v, openMethod: %v", internal, openMethod)
 	if !internal && !openMethod {
 		tkn, err := tokenFromCtx(ctx)
 		if err != nil {
