@@ -99,7 +99,6 @@ func (i *interceptor) handleReq(ctx context.Context, req interface{},
 	// 开放方法
 	openMethods := viper.GetStringSlice("auth.open_method")
 	openMethod := cutils.InStringList(openMethods, info.FullMethod)
-	log.Debugf("internal: %v, openMethod: %v", internal, openMethod)
 	if !internal && !openMethod {
 		tkn, err := tokenFromCtx(ctx)
 		if err != nil {
