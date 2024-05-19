@@ -28,6 +28,7 @@ type GatewayConfig struct {
 	AuthPublicKeyFile string
 	GrpcSubConfigs    []GrpcGatewayConfig
 	HandlePathConfigs []HandlePathConfig
+	TracingWrapper    bool
 }
 
 type HandlePathConfig struct {
@@ -84,8 +85,11 @@ func RunGatewayServer(config *GatewayConfig) {
 		}
 	}
 	log.Infof("grpc gateway started at %s", config.GateAddr)
-	// panic(http.ListenAndServe(config.GateAddr, tracingWrapper(mux)))
-	panic(http.ListenAndServe(config.GateAddr, mux))
+	var handler http.Handler = mux
+	if config.TracingWrapper {
+		handler = tracingWrapper(mux)
+	}
+	panic(http.ListenAndServe(config.GateAddr, handler))
 }
 
 func tracingWrapper(h http.Handler) http.Handler {
