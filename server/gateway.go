@@ -8,10 +8,11 @@ import (
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/thinkeridea/go-extend/exnet"
-	"github.com/turing-era/turingera-shared/log"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/protobuf/encoding/protojson"
+
+	"github.com/turing-era/turingera-shared/log"
 )
 
 // GrpcGatewayConfig 网关服务子配置
@@ -83,7 +84,8 @@ func RunGatewayServer(config *GatewayConfig) {
 		}
 	}
 	log.Infof("grpc gateway started at %s", config.GateAddr)
-	panic(http.ListenAndServe(config.GateAddr, tracingWrapper(mux)))
+	// panic(http.ListenAndServe(config.GateAddr, tracingWrapper(mux)))
+	panic(http.ListenAndServe(config.GateAddr, mux))
 }
 
 func tracingWrapper(h http.Handler) http.Handler {
