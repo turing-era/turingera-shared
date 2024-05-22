@@ -1,9 +1,9 @@
 package uniqueid
 
 import (
-	"fmt"
-
 	"github.com/sony/sonyflake"
+
+	"github.com/turing-era/turingera-shared/log"
 )
 
 var flake *sonyflake.Sonyflake
@@ -14,10 +14,11 @@ func InitUniqueID() {
 }
 
 // NewID 创建唯一ID
-func NewID() (uint64, error) {
+func NewID() int64 {
 	id, err := flake.NextID()
 	if err != nil {
-		return 0, fmt.Errorf("flake.NextID err: %v", err)
+		log.Errorf("flake.NextID err: %v", err)
+		return 0
 	}
-	return id, nil
+	return int64(id)
 }
