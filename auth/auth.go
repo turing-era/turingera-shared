@@ -12,6 +12,7 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/spf13/viper"
 
+	"github.com/turing-era/turingera-shared/auth/token"
 	"github.com/turing-era/turingera-shared/cutils"
 	"github.com/turing-era/turingera-shared/log"
 
@@ -19,8 +20,6 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
-
-	"github.com/funstartech/funstar-shared/auth/token"
 )
 
 func loadPublicKey(publicKeyFile string) (*rsa.PublicKey, error) {
