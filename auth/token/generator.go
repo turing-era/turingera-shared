@@ -1,9 +1,8 @@
 package token
 
 import (
-	"crypto/rsa"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
 	"time"
 
@@ -16,15 +15,16 @@ type JwtTokenGenerator struct {
 	appid      string
 	issuer     string
 	alg        string
-	privateKey *rsa.PrivateKey
+	privateKey interface{}
 }
 
 // NewJwtTokenGenerator 新建token生成器
 // jwt测试：https://jwt.io/
 // 公私钥生成：https://www.metools.info/code/c80.html
 func NewJwtTokenGenerator() *JwtTokenGenerator {
+	alg := viper.GetString("auth.jwt_alg")
 	path := viper.GetString("auth.private_path")
-	privKey, err := loadPrivateKey(path)
+	privKey, err := loadPrivateKey(path, alg)
 	if err != nil {
 		panic("loadPrivateKey err: " + err.Error())
 	}
@@ -37,16 +37,24 @@ func NewJwtTokenGenerator() *JwtTokenGenerator {
 }
 
 // 加载私钥
-func loadPrivateKey(keyPath string) (*rsa.PrivateKey, error) {
+func loadPrivateKey(keyPath, alg string) (interface{}, error) {
 	pkFile, err := os.Open(keyPath)
 	if err != nil {
 		return nil, fmt.Errorf("cannot open private key: %v", err)
 	}
-	pkBytes, err := ioutil.ReadAll(pkFile)
+	pkBytes, err := io.ReadAll(pkFile)
 	if err != nil {
 		return nil, fmt.Errorf("cannot read private key: %v", err)
 	}
-	privKey, err := jwt.ParseRSAPrivateKeyFromPEM(pkBytes)
+	var privKey interface{}
+	switch alg {
+	case "RS512":
+		privKey, err = jwt.ParseRSAPrivateKeyFromPEM(pkBytes)
+	case "ES256":
+		privKey, err = jwt.ParseECPrivateKeyFromPEM(pkBytes)
+	default:
+		return nil, fmt.Errorf("invalid alg: %v", alg)
+	}
 	if err != nil {
 		return nil, fmt.Errorf("cannot parse private key: %v", err)
 	}

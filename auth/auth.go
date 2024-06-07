@@ -24,18 +24,18 @@ type interceptor struct {
 var DefaultInterceptor *interceptor
 
 // LoadInterceptor 注入方式拦截器方法
-func LoadInterceptor(publicKeyFile string) (grpc.UnaryServerInterceptor, error) {
+func LoadInterceptor(keyPath string) (grpc.UnaryServerInterceptor, error) {
 	intercept := &interceptor{
-		verifier: token.NewJwtTokenVerifier(publicKeyFile),
+		verifier: token.NewJwtTokenVerifier(keyPath),
 	}
 	return intercept.handleReq, nil
 
 }
 
 // InitInterceptor 非注入方式初始化拦截器
-func InitInterceptor(publicKeyFile string) error {
+func InitInterceptor(keyPath string) error {
 	intercept := &interceptor{
-		verifier: token.NewJwtTokenVerifier(publicKeyFile),
+		verifier: token.NewJwtTokenVerifier(keyPath),
 	}
 	DefaultInterceptor = intercept
 	return nil

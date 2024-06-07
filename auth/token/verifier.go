@@ -1,10 +1,9 @@
 package token
 
 import (
-	"crypto/rsa"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
 	"time"
 
@@ -19,33 +18,42 @@ type JwtTokenVerifier struct {
 	appid      string
 	issuer     string
 	alg        string
-	publicKey *rsa.PublicKey
+	publicKey interface{}
 }
 
-func NewJwtTokenVerifier(publicKeyFile string) *JwtTokenVerifier {
-	pubKey, err := loadPublicKey(publicKeyFile)
+func NewJwtTokenVerifier(keyPath string) *JwtTokenVerifier {
+	alg := viper.GetString("auth.jwt_alg")
+	pubKey, err := loadPublicKey(keyPath, alg)
 	if err != nil {
 		panic("loadPublicKey err: " + err.Error())
 	}
 	return &JwtTokenVerifier{
 		appid:      viper.GetString("auth.jwt_appid"),
 		issuer:     viper.GetString("auth.jwt_issuer"),
-		alg:        viper.GetString("auth.jwt_alg"),
+		alg:        alg,
 		publicKey: pubKey,
 	}
 }
 
 // 加载公钥
-func loadPublicKey(publicKeyFile string) (*rsa.PublicKey, error) {
-	f, err := os.Open(publicKeyFile)
+func loadPublicKey(keyPath, alg string) (interface{}, error) {
+	pkFile, err := os.Open(keyPath)
 	if err != nil {
 		return nil, fmt.Errorf("cannot open public key file: %v", err)
 	}
-	b, err := ioutil.ReadAll(f)
+	pkBytes, err := io.ReadAll(pkFile)
 	if err != nil {
 		return nil, fmt.Errorf("cannot read public key: %v", err)
 	}
-	pubKey, err := jwt.ParseRSAPublicKeyFromPEM(b)
+	var pubKey interface{}
+	switch alg {
+	case "RS512":
+		pubKey, err = jwt.ParseRSAPublicKeyFromPEM(pkBytes)
+	case "ES256":
+		pubKey, err = jwt.ParseECPublicKeyFromPEM(pkBytes)
+	default:
+		return nil, fmt.Errorf("invalid alg: %v", alg)
+	}
 	if err != nil {
 		return nil, fmt.Errorf("cannot parse public key: %v", err)
 	}
