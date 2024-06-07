@@ -9,11 +9,17 @@ import (
 	"github.com/turing-era/turingera-shared/log"
 )
 
+const (
+	AuthPublicKeyTypeRSA256 = 0
+	AuthPublicKeyTypeES256 = 1
+)
+
 // GrpcConfig grpc服务配置
 type GrpcConfig struct {
 	Name              string
 	Addr              string
 	AuthPublicKeyFile string
+
 	RegisterFuncs     []func(*grpc.Server)
 }
 
@@ -29,7 +35,7 @@ func RunGrpcServer(c *GrpcConfig) {
 	// 鉴权拦截器
 	log.Debugf("serverConfig: %+v", c)
 	if len(c.AuthPublicKeyFile) > 0 {
-		in, err := auth.Interceptor(c.AuthPublicKeyFile)
+		in, err := auth.LoadInterceptor(c.AuthPublicKeyFile)
 		if err != nil {
 			panic("cannot create auth intercept: " + err.Error())
 		}

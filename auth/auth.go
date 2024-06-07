@@ -2,72 +2,43 @@ package auth
 
 import (
 	"context"
-	"crypto/rsa"
 	"fmt"
-	"io/ioutil"
 	"net/http"
-	"os"
 	"strings"
 
-	"github.com/dgrijalva/jwt-go"
 	"github.com/spf13/viper"
-
-	"github.com/turing-era/turingera-shared/auth/token"
-	"github.com/turing-era/turingera-shared/cutils"
-	"github.com/turing-era/turingera-shared/log"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
+
+	"github.com/turing-era/turingera-shared/auth/token"
+	"github.com/turing-era/turingera-shared/cutils"
 )
 
-func loadPublicKey(publicKeyFile string) (*rsa.PublicKey, error) {
-	f, err := os.Open(publicKeyFile)
-	if err != nil {
-		return nil, fmt.Errorf("cannot open public key file: %v", err)
-	}
-	b, err := ioutil.ReadAll(f)
-	if err != nil {
-		return nil, fmt.Errorf("cannot read public key: %v", err)
-	}
-	pubKey, err := jwt.ParseRSAPublicKeyFromPEM(b)
-	if err != nil {
-		return nil, fmt.Errorf("cannot parse public key: %v", err)
-	}
-	return pubKey, nil
-}
-
-// Interceptor 拦截器方法
-func Interceptor(publicKeyFile string) (grpc.UnaryServerInterceptor, error) {
-	pubKey, err := loadPublicKey(publicKeyFile)
-	if err != nil {
-		return nil, err
-	}
-	log.Debugf("load publicKeyFile: %v, pubKey: %v", publicKeyFile, pubKey)
-	i := &interceptor{
-		verifier: &token.JWTTokenVerifier{PublicKey: pubKey},
-	}
-	return i.handleReq, nil
-
+type interceptor struct {
+	verifier *token.JwtTokenVerifier
 }
 
 var DefaultInterceptor *interceptor
 
-// InitInterceptor 原生拦截器
-func InitInterceptor(publicKeyFile string) error {
-	pubKey, err := loadPublicKey(publicKeyFile)
-	if err != nil {
-		return err
+// LoadInterceptor 注入方式拦截器方法
+func LoadInterceptor(publicKeyFile string) (grpc.UnaryServerInterceptor, error) {
+	intercept := &interceptor{
+		verifier: token.NewJwtTokenVerifier(publicKeyFile),
 	}
-	DefaultInterceptor = &interceptor{
-		verifier: &token.JWTTokenVerifier{PublicKey: pubKey},
-	}
-	return nil
+	return intercept.handleReq, nil
+
 }
 
-type interceptor struct {
-	verifier *token.JWTTokenVerifier
+// InitInterceptor 非注入方式初始化拦截器
+func InitInterceptor(publicKeyFile string) error {
+	intercept := &interceptor{
+		verifier: token.NewJwtTokenVerifier(publicKeyFile),
+	}
+	DefaultInterceptor = intercept
+	return nil
 }
 
 // GetAuthUserID 获取鉴权userID
@@ -96,8 +67,7 @@ func (i *interceptor) handleReq(ctx context.Context, req interface{},
 	from := metadata.ValueFromIncomingContext(ctx, "from")
 	internal := len(from) > 0 && from[0] == "internal"
 	// 开放方法
-	openMethods := viper.GetStringSlice("auth.open_method")
-	openMethod := cutils.InStringList(openMethods, info.FullMethod)
+	openMethod := cutils.InStringList(viper.GetStringSlice("auth.open_method"), info.FullMethod)
 	if !internal && !openMethod {
 		tkn, err := tokenFromCtx(ctx)
 		if err != nil {
