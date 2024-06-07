@@ -70,7 +70,7 @@ type PrivyClaims struct {
 
 // This method will be used to check the token's claims later
 func (v *JwtTokenVerifier) valid(c *jwt.RegisteredClaims) error {
-	if len(c.Audience) == 0 || c.Audience[0] != v.appid {
+	if len(c.Audience) > 0 && c.Audience[0] != v.appid {
 		return errors.New("aud claim must be your Privy App ID")
 	}
 	if c.Issuer != c.Issuer {
