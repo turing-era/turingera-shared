@@ -9,6 +9,7 @@ import (
 	"net/url"
 
 	jsoniter "github.com/json-iterator/go"
+
 	"github.com/turing-era/turingera-shared/cutils"
 	"github.com/turing-era/turingera-shared/log"
 )
@@ -34,6 +35,35 @@ func Get(path string, rsp interface{}, header map[string]string) error {
 			httpReq.Header.Set(k, v)
 		}
 	}
+	resp, err := client.Do(httpReq)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+	log.Debugf("http rsp: %s", body)
+	if err = jsoniter.Unmarshal(body, rsp); err != nil {
+		return err
+	}
+	return nil
+}
+
+// GetBasicAuth 发送带认证的Get请求
+func GetBasicAuth(path string, rsp interface{}, header map[string]string, username, password string) error {
+	httpReq, err := http.NewRequest("GET", path, nil)
+	if err != nil {
+		return err
+	}
+	httpReq.Header.Set("Content-Type", "application/json")
+	if header != nil {
+		for k, v := range header {
+			httpReq.Header.Set(k, v)
+		}
+	}
+	httpReq.SetBasicAuth(username, password)
 	resp, err := client.Do(httpReq)
 	if err != nil {
 		return err
