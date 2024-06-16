@@ -21,6 +21,9 @@ type interceptor struct {
 	verifier *token.JwtTokenVerifier
 }
 
+// PrivyPrefix privy SDK userID前缀
+const PrivyPrefix = "did:privy:"
+
 var DefaultInterceptor *interceptor
 
 // LoadInterceptor 注入方式拦截器方法
@@ -57,6 +60,7 @@ func (i *interceptor) GetAuthUserID(w http.ResponseWriter, r *http.Request) (str
 		http.Error(w, fmt.Sprintf("token not valid: %v", err), http.StatusUnauthorized)
 		return "", false
 	}
+	userID = strings.ReplaceAll(userID, PrivyPrefix, "")
 	return userID, true
 }
 
@@ -77,6 +81,7 @@ func (i *interceptor) handleReq(ctx context.Context, req interface{},
 		if err != nil {
 			return nil, status.Errorf(codes.Unauthenticated, "token not valid: %v", err)
 		}
+		userID = strings.ReplaceAll(userID, PrivyPrefix, "")
 		ctx = ctxWithUserID(ctx, userID)
 	}
 	return handler(ctx, req)
