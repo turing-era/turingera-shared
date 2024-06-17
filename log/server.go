@@ -18,12 +18,13 @@ func ServerLogInterceptor(ctx context.Context, req interface{},
 	start := time.Now()
 	defer ServerRecover()
 
+	reqJson := cutils.Obj2Json(req)
 	rsp, err := handler(ctx, req)
 	cost := time.Since(start)
 	if err != nil {
-		Errorf("%s, cost: %v, req: %s, err: %v", info.FullMethod, cost, cutils.Obj2Json(req), err)
+		Errorf("%s, cost: %v, req: %s, err: %v", info.FullMethod, cost, reqJson, err)
 	} else {
-		Debugf("%s, cost: %v, req: %s, rsp: %s", info.FullMethod, cost, cutils.Obj2Json(req), cutils.Obj2Json(rsp))
+		Debugf("%s, cost: %v, req: %s, rsp: %s", info.FullMethod, cost, reqJson, cutils.Obj2Json(rsp))
 	}
 	return rsp, err
 }
