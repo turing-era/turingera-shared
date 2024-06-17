@@ -19,11 +19,11 @@ func ServerLogInterceptor(ctx context.Context, req interface{},
 	defer ServerRecover()
 
 	rsp, err := handler(ctx, req)
-	cost := time.Since(start).Milliseconds()
+	cost := time.Since(start)
 	if err != nil {
-		Errorf("[%v][cost: %vms]req: %v\nerr: %v", info.FullMethod, cost, cutils.Obj2Json(req), err)
+		Errorf("%s, cost: %v, req: %s, err: %v", info.FullMethod, cost, cutils.Obj2Json(req), err)
 	} else {
-		Debugf("[%v][cost: %vms]req: %v\nrsp: %v", info.FullMethod, cost, cutils.Obj2Json(req), cutils.Obj2Json(rsp))
+		Debugf("%s, cost: %v, req: %s, rsp: %s", info.FullMethod, cost, cutils.Obj2Json(req), cutils.Obj2Json(rsp))
 	}
 	return rsp, err
 }
