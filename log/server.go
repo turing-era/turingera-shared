@@ -5,8 +5,9 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/turing-era/turingera-shared/cutils"
 	"google.golang.org/grpc"
+
+	"github.com/turing-era/turingera-shared/cutils"
 )
 
 const panicBufLen = 1024
@@ -16,14 +17,13 @@ func ServerLogInterceptor(ctx context.Context, req interface{},
 	info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 	start := time.Now()
 	defer ServerRecover()
-	Debugf("[%v]req: %v", info.FullMethod, cutils.Obj2Json(req))
 
 	rsp, err := handler(ctx, req)
 	cost := time.Since(start).Milliseconds()
 	if err != nil {
-		Errorf("[%v][cost: %vms]err: %v", info.FullMethod, cost, err)
+		Errorf("[%v][cost: %vms]req: %v\nerr: %v", info.FullMethod, cost, cutils.Obj2Json(req), err)
 	} else {
-		Debugf("[%v][cost: %vms]rsp: %v", info.FullMethod, cost, cutils.Obj2Json(rsp))
+		Debugf("[%v][cost: %vms]req: %v\nrsp: %v", info.FullMethod, cost, cutils.Obj2Json(req), cutils.Obj2Json(rsp))
 	}
 	return rsp, err
 }
