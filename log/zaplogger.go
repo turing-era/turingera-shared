@@ -46,7 +46,17 @@ func Error(args ...interface{}) {
 	sugar.Error(args...)
 }
 
-// Errorf logs to ERROR log. Arguments are handled in the manner of fmt.Printf.
+// Errorf logs to FATAL log. Arguments are handled in the manner of fmt.Printf.
 func Errorf(format string, args ...interface{}) {
 	sugar.Errorf(format, args...)
+}
+
+// Fatal logs to FATAL log. Arguments are handled in the manner of fmt.Printf.
+func Fatal(args ...interface{}) {
+	sugar.Fatal(args...)
+}
+
+// Fatalf logs to ERROR log. Arguments are handled in the manner of fmt.Printf.
+func Fatalf(format string, args ...interface{}) {
+	sugar.Fatalf(format, args...)
 }
