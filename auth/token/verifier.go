@@ -9,15 +9,13 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/spf13/viper"
-
-	"github.com/turing-era/turingera-shared/log"
 )
 
 // JwtTokenVerifier JWT验证器
 type JwtTokenVerifier struct {
-	appid      string
-	issuer     string
-	alg        string
+	appid     string
+	issuer    string
+	alg       string
 	publicKey interface{}
 }
 
@@ -28,9 +26,9 @@ func NewJwtTokenVerifier(keyPath string) *JwtTokenVerifier {
 		panic("loadPublicKey err: " + err.Error())
 	}
 	return &JwtTokenVerifier{
-		appid:      viper.GetString("auth.jwt_appid"),
-		issuer:     viper.GetString("auth.jwt_issuer"),
-		alg:        alg,
+		appid:     viper.GetString("auth.jwt_appid"),
+		issuer:    viper.GetString("auth.jwt_issuer"),
+		alg:       alg,
 		publicKey: pubKey,
 	}
 }
@@ -92,7 +90,7 @@ func (v *JwtTokenVerifier) keyFunc(token *jwt.Token) (interface{}, error) {
 
 // Verify JWT验证
 func (v *JwtTokenVerifier) Verify(accessToken string) (string, error) {
-	log.Debugf("accessToken: %s", accessToken)
+	// log.Debugf("accessToken: %s", accessToken)
 	token, err := jwt.ParseWithClaims(accessToken, &jwt.RegisteredClaims{}, v.keyFunc)
 	if err != nil {
 		return "", fmt.Errorf("cannot parse token: %v", err)
@@ -104,7 +102,7 @@ func (v *JwtTokenVerifier) Verify(accessToken string) (string, error) {
 	if !ok {
 		return "", fmt.Errorf("token claim is not RegisteredClaims")
 	}
-	log.Debugf("appid: %v, clm: %+v", v.appid, clm)
+	// log.Debugf("appid: %v, clm: %+v", v.appid, clm)
 	if err = v.valid(clm); err != nil {
 		return "", fmt.Errorf("claim not valid: %v", err)
 	}
