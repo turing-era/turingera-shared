@@ -1,7 +1,6 @@
 package token
 
 import (
-	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -69,13 +68,13 @@ type PrivyClaims struct {
 // This method will be used to check the token's claims later
 func (v *JwtTokenVerifier) valid(c *jwt.RegisteredClaims) error {
 	if len(c.Audience) > 0 && c.Audience[0] != v.appid {
-		return errors.New("aud claim must be your Privy App ID")
+		return fmt.Errorf("aud claim must be your Privy AppID -- %+v", c)
 	}
 	if c.Issuer != c.Issuer {
-		return errors.New("iss claim must be 'privy.io'")
+		return fmt.Errorf("iss claim must be 'privy.io' -- %+v", c)
 	}
 	if c.ExpiresAt.Time.Before(time.Now()) {
-		return errors.New("token is expired")
+		return fmt.Errorf("token is expired -- %+v", c)
 	}
 	return nil
 }
