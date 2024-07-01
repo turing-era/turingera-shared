@@ -7,6 +7,7 @@ import (
 
 	"google.golang.org/grpc"
 
+	"github.com/turing-era/turingera-shared/auth"
 	"github.com/turing-era/turingera-shared/cutils"
 )
 
@@ -18,13 +19,17 @@ func ServerLogInterceptor(ctx context.Context, req interface{},
 	start := time.Now()
 	defer ServerRecover()
 
+	userID, err := auth.UserIDFromCtx(ctx)
+	if err != nil {
+		return nil, err
+	}
 	reqJson := cutils.Obj2Json(req)
 	rsp, err := handler(ctx, req)
 	cost := time.Since(start)
 	if err != nil {
-		Errorf("[serverlog]: %s, cost: %v, req: %s, err: %v", info.FullMethod, cost, reqJson, err)
+		Errorf("[serverlog][userid:%s]: %s, cost: %v, req: %s, err: %v", userID, info.FullMethod, cost, reqJson, err)
 	} else {
-		Debugf("[serverlog]: %s, cost: %v, req: %s, rsp: %s", info.FullMethod, cost, reqJson, cutils.Obj2Json(rsp))
+		Debugf("[serverlog][userid:%s]: %s, cost: %v, req: %s, rsp: %s", userID, info.FullMethod, cost, reqJson, cutils.Obj2Json(rsp))
 	}
 	return rsp, err
 }

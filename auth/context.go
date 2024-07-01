@@ -8,8 +8,6 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
-
-	"github.com/turing-era/turingera-shared/log"
 )
 
 const (
@@ -37,7 +35,7 @@ func tokenFromCtx(ctx context.Context) (string, error) {
 }
 
 func ctxWithUserID(ctx context.Context, userID string) context.Context {
-	log.Debugf("user_id: %v", userID)
+	// log.Debugf("user_id: %v", userID)
 	return context.WithValue(ctx, userIDKey, userID)
 }
 
