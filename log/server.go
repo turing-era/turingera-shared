@@ -19,13 +19,11 @@ func ServerLogInterceptor(ctx context.Context, req interface{},
 	start := time.Now()
 	defer ServerRecover()
 
-	userID, err := auth.UserIDFromCtx(ctx)
-	if err != nil {
-		return nil, err
-	}
 	reqJson := cutils.Obj2Json(req)
 	rsp, err := handler(ctx, req)
 	cost := time.Since(start)
+
+	userID, _ := auth.UserIDFromCtx(ctx)
 	if err != nil {
 		Errorf("[serverlog][userid:%s]: %s, cost: %v, req: %s, err: %v", userID, info.FullMethod, cost, reqJson, err)
 	} else {
