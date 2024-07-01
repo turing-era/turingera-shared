@@ -11,7 +11,7 @@ import (
 
 const (
 	AuthPublicKeyTypeRSA256 = 0
-	AuthPublicKeyTypeES256 = 1
+	AuthPublicKeyTypeES256  = 1
 )
 
 // GrpcConfig grpc服务配置
@@ -20,7 +20,7 @@ type GrpcConfig struct {
 	Addr              string
 	AuthPublicKeyFile string
 
-	RegisterFuncs     []func(*grpc.Server)
+	RegisterFuncs []func(*grpc.Server)
 }
 
 // RunGrpcServer 启动grpc服务
@@ -30,8 +30,6 @@ func RunGrpcServer(c *GrpcConfig) {
 		panic("grpc cannot listen: " + err.Error())
 	}
 	var interceptors []grpc.UnaryServerInterceptor
-	// 日志拦截器
-	interceptors = append(interceptors, log.ServerLogInterceptor)
 	// 鉴权拦截器
 	log.Debugf("serverConfig: %+v", c)
 	if len(c.AuthPublicKeyFile) > 0 {
@@ -41,6 +39,9 @@ func RunGrpcServer(c *GrpcConfig) {
 		}
 		interceptors = append(interceptors, in)
 	}
+	// 日志拦截器
+	interceptors = append(interceptors, log.ServerLogInterceptor)
+
 	s := grpc.NewServer(grpc.ChainUnaryInterceptor(interceptors...))
 	for _, f := range c.RegisterFuncs {
 		f(s)
