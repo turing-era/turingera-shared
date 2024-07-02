@@ -8,8 +8,6 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/spf13/viper"
-
-	"github.com/turing-era/turingera-shared/log"
 )
 
 // JwtTokenVerifier JWT验证器
@@ -91,7 +89,7 @@ func (v *JwtTokenVerifier) keyFunc(token *jwt.Token) (interface{}, error) {
 
 // Verify JWT验证
 func (v *JwtTokenVerifier) Verify(accessToken string) (string, error) {
-	log.Debugf("accessToken: %s", accessToken)
+	fmt.Printf("accessToken: %s\n", accessToken)
 	token, err := jwt.ParseWithClaims(accessToken, &jwt.RegisteredClaims{}, v.keyFunc)
 	if err != nil {
 		return "", fmt.Errorf("cannot parse token: %v", err)
@@ -103,7 +101,7 @@ func (v *JwtTokenVerifier) Verify(accessToken string) (string, error) {
 	if !ok {
 		return "", fmt.Errorf("token claim is not RegisteredClaims")
 	}
-	log.Debugf("appid: %v, clm: %+v", v.appid, clm)
+	fmt.Printf("appid: %v, clm: %+v\n", v.appid, clm)
 	if err = v.valid(clm); err != nil {
 		return "", fmt.Errorf("claim not valid: %v", err)
 	}
