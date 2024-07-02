@@ -8,6 +8,8 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/spf13/viper"
+
+	"github.com/turing-era/turingera-shared/log"
 )
 
 // JwtTokenVerifier JWT验证器
@@ -89,7 +91,7 @@ func (v *JwtTokenVerifier) keyFunc(token *jwt.Token) (interface{}, error) {
 
 // Verify JWT验证
 func (v *JwtTokenVerifier) Verify(accessToken string) (string, error) {
-	// log.Debugf("accessToken: %s", accessToken)
+	log.Debugf("accessToken: %s", accessToken)
 	token, err := jwt.ParseWithClaims(accessToken, &jwt.RegisteredClaims{}, v.keyFunc)
 	if err != nil {
 		return "", fmt.Errorf("cannot parse token: %v", err)
