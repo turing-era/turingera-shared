@@ -103,7 +103,7 @@ func (v *JwtTokenVerifier) Verify(accessToken string) (string, error) {
 	if !ok {
 		return "", fmt.Errorf("token claim is not RegisteredClaims")
 	}
-	// log.Debugf("appid: %v, clm: %+v", v.appid, clm)
+	log.Debugf("appid: %v, clm: %+v", v.appid, clm)
 	if err = v.valid(clm); err != nil {
 		return "", fmt.Errorf("claim not valid: %v", err)
 	}
