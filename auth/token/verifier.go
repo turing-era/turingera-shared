@@ -89,10 +89,10 @@ func (v *JwtTokenVerifier) keyFunc(token *jwt.Token) (interface{}, error) {
 
 // Verify JWT验证
 func (v *JwtTokenVerifier) Verify(accessToken string) (string, error) {
-	fmt.Printf("accessToken: %s\n", accessToken)
+	// fmt.Printf("accessToken: %s\n", accessToken)
 	token, err := jwt.ParseWithClaims(accessToken, &jwt.RegisteredClaims{}, v.keyFunc)
 	if err != nil {
-		return "", fmt.Errorf("cannot parse token: %v", err)
+		return "", fmt.Errorf("cannot parse token[%v]: %v", accessToken, err)
 	}
 	if !token.Valid {
 		return "", fmt.Errorf("token not valid")
@@ -101,7 +101,7 @@ func (v *JwtTokenVerifier) Verify(accessToken string) (string, error) {
 	if !ok {
 		return "", fmt.Errorf("token claim is not RegisteredClaims")
 	}
-	fmt.Printf("appid: %v, clm: %+v\n", v.appid, clm)
+	// fmt.Printf("appid: %v, clm: %+v\n", v.appid, clm)
 	if err = v.valid(clm); err != nil {
 		return "", fmt.Errorf("claim not valid: %v", err)
 	}
